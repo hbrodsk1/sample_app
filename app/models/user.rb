@@ -1,5 +1,6 @@
 class User < ApplicationRecord
 	attr_accessor :remember_token
+  has_many :microposts, dependent: :destroy
 
 	before_save { email.downcase! }
 	validates :name, presence: true, length: { maximum: 50 }
@@ -10,10 +11,10 @@ class User < ApplicationRecord
 	has_secure_password
 	validates :password, presence: true, length: { minimum: 6 }, allow_nil: true
 
-	def self.digest(string)
-		cost = ActiveModel::SecurePassword.min_cost ? BCrypt::Engine::MIN_COST :
+	  def self.digest(string)
+		  cost = ActiveModel::SecurePassword.min_cost ? BCrypt::Engine::MIN_COST :
                                                   BCrypt::Engine.cost
-    BCrypt::Password.create(string, cost: cost)
+      BCrypt::Password.create(string, cost: cost)
   	end
 
   	def self.new_token
@@ -33,4 +34,8 @@ class User < ApplicationRecord
   	def forget
   		update_attribute(:remember_digest, nil)
   	end
+
+    def feed
+      Micropost.where("user_id = ?", id)
+    end
 end
